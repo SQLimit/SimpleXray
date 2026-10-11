@@ -49,15 +49,6 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
           cache: false
 
-      - name: Setup Keystore and Properties
-        if: github.event_name != 'pull_request'
-        run: |
-          echo "${{ secrets.SIGNING_KEYSTORE }}" | base64 -d > ./store.jks
-          echo "storeFile=store.jks" > ./store.properties
-          echo "storePassword=${{ secrets.SIGNING_STORE_PASSWORD }}" >> ./store.properties
-          echo "keyAlias=${{ secrets.SIGNING_KEY_ALIAS }}" >> ./store.properties
-          echo "keyPassword=${{ secrets.SIGNING_KEY_PASSWORD }}" >> ./store.properties
-
       - name: Download Rules Files
         run: |
           wget https://github.com/lhear/v2ray-rules-dat/releases/download/${{ env.GEOIP_VERSION }}/geoip.dat -O ./app/src/main/assets/geoip.dat
