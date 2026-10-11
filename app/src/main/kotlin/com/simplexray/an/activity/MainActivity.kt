@@ -40,6 +40,9 @@ class MainActivity : ComponentActivity() {
         initView()
 
         processShareIntent(intent)
+        if (savedInstanceState == null) {
+            requestAutoStartIfLauncher(intent)
+        }
         Log.d(TAG, "MainActivity onCreate called.")
     }
 
@@ -81,6 +84,16 @@ class MainActivity : ComponentActivity() {
         setIntent(intent)
         intent?.let {
             processShareIntent(intent)
+            requestAutoStartIfLauncher(intent)
+        }
+    }
+
+    private fun requestAutoStartIfLauncher(intent: Intent) {
+        if (intent.action == Intent.ACTION_MAIN &&
+            (intent.hasCategory(Intent.CATEGORY_LAUNCHER) ||
+                intent.hasCategory(Intent.CATEGORY_LEANBACK_LAUNCHER))
+        ) {
+            mainViewModel.requestServiceAutoStart()
         }
     }
 
