@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.core.content.FileProvider
 import com.simplexray.an.R
-import com.simplexray.an.service.TProxyService
 import com.simplexray.an.viewmodel.LogViewModel
 import com.simplexray.an.viewmodel.MainViewModel
 import kotlinx.coroutines.launch
@@ -111,12 +110,7 @@ fun rememberMainScreenCallbacks(
         if (mainViewModel.isServiceEnabled.value) {
             mainViewModel.stopTProxyService()
         } else {
-            mainViewModel.setControlMenuClickable(false)
-            if (mainViewModel.settingsState.value.switches.disableVpn) {
-                mainViewModel.startTProxyService(TProxyService.ACTION_START)
-            } else {
-                mainViewModel.prepareAndStartVpn(launchers.vpnPrepareLauncher)
-            }
+            mainViewModel.startServiceIfStopped(launchers.vpnPrepareLauncher)
         }
     }
 
