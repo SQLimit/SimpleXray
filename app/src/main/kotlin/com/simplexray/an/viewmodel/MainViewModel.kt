@@ -133,6 +133,11 @@ class MainViewModel(application: Application) :
     private val _selectedConfigFile = MutableStateFlow<File?>(null)
     val selectedConfigFile: StateFlow<File?> = _selectedConfigFile.asStateFlow()
 
+    private val _autoStartRequest = MutableStateFlow(0L)
+    val autoStartRequest: StateFlow<Long> = _autoStartRequest.asStateFlow()
+    private var handledAutoStartRequest = 0L
+    private val initializationJob: Job
+
     private val _geoipDownloadProgress = MutableStateFlow<String?>(null)
     val geoipDownloadProgress: StateFlow<String?> = _geoipDownloadProgress.asStateFlow()
     private var geoipDownloadJob: Job? = null
@@ -171,12 +176,13 @@ class MainViewModel(application: Application) :
 
         setupGlobalSocksAuthenticator()
 
-        viewModelScope.launch(Dispatchers.IO) {
+        initializationJob = viewModelScope.launch(Dispatchers.IO) {
             _isServiceEnabled.value = isServiceRunning(application, TProxyService::class.java)
 
+            extractAssetsIfNeeded()
             updateSettingsState()
             loadKernelVersion()
-            refreshConfigFileList()
+            refreshConfigFileList().join()
         }
     }
 
@@ -625,6 +631,43 @@ class MainViewModel(application: Application) :
         _uiEvent.trySend(MainViewUiEvent.ShowSnackbar(application.getString(R.string.export_failed)))
     }
 
+    fun requestServiceAutoStart() {
+        _autoStartRequest.value += 1
+    }
+
+    suspend fun autoStartServiceOnLaunch(
+        request: Long,
+        vpnPrepareLauncher: ActivityResultLauncher<Intent>
+    ) {
+        if (request == 0L || request <= handledAutoStartRequest) return
+
+        // Wait for assets, service state and the saved config selection to be ready.
+        initializationJob.join()
+        if (request <= handledAutoStartRequest) return
+        handledAutoStartRequest = request
+
+        // An empty installation stays available for importing its first config.
+        if (_selectedConfigFile.value?.isFile != true) return
+        startServiceIfStopped(vpnPrepareLauncher)
+    }
+
+    fun startServiceIfStopped(vpnPrepareLauncher: ActivityResultLauncher<Intent>) {
+        if (_isServiceEnabled.value || !_controlMenuClickable.value) return
+        // Recheck the native service: it may already be running in another process.
+        if (isServiceRunning(application, TProxyService::class.java)) {
+            setServiceEnabled(true)
+            return
+        }
+
+        setServiceEnabled(false)
+        setControlMenuClickable(false)
+        if (settingsState.value.switches.disableVpn) {
+            startTProxyService(TProxyService.ACTION_START)
+        } else {
+            prepareAndStartVpn(vpnPrepareLauncher)
+        }
+    }
+
     fun startTProxyService(action: String) {
         viewModelScope.launch {
             if (_selectedConfigFile.value == null) {
@@ -703,8 +746,8 @@ class MainViewModel(application: Application) :
         prefs.configFilesOrder = currentList.map { it.name }
     }
 
-    fun refreshConfigFileList() {
-        viewModelScope.launch(Dispatchers.IO) {
+    fun refreshConfigFileList(): Job {
+        return viewModelScope.launch(Dispatchers.IO) {
             val filesDir = application.filesDir
             val actualFiles =
                 filesDir.listFiles { file -> file.isFile && file.name.endsWith(".json") }?.toList()
