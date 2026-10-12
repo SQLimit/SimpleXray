@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="config_tab_title">Config</string>
+    <string name="auto_start_on_launch_title">Connect automatically when opening the app</string>
+    <string name="auto_start_on_launch_summary">Use the selected profile when opening the app from its icon. Turning this off keeps the current connection running.</string>
     <string name="app_name" translatable="false">SimpleXray</string>
     <string name="source_url" translatable="false">https://github.com/lhear/SimpleXray</string>
     <string name="geoip_url" translatable="false">https://github.com/lhear/v2ray-rules-dat/releases/latest/download/geoip.dat</string>
