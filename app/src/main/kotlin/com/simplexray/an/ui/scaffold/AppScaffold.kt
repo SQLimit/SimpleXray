@@ -38,6 +38,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -494,7 +495,14 @@ fun AppBottomNavigationBar(navController: NavHostController) {
                     contentDescription = stringResource(R.string.configuration)
                 )
             },
-            label = { Text(stringResource(R.string.configuration)) }
+            label = {
+                Text(
+                    text = stringResource(R.string.config_tab_title),
+                    maxLines = 1,
+                    softWrap = false,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         )
         NavigationBarItem(
             alwaysShowLabel = false,
