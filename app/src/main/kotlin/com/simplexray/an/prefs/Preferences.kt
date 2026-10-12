@@ -184,6 +184,12 @@ class Preferences(context: Context) {
             setValueInProvider(ENABLE, enable)
         }
 
+    var autoStartOnLaunch: Boolean
+        get() = getBooleanPref(AUTO_START_ON_LAUNCH, true)
+        set(value) {
+            setValueInProvider(AUTO_START_ON_LAUNCH, value)
+        }
+
     var disableVpn: Boolean
         get() = getBooleanPref(DISABLE_VPN, false)
         set(value) {
@@ -336,6 +342,7 @@ class Preferences(context: Context) {
         const val CUSTOM_GEOSITE_IMPORTED: String = "CustomGeositeImported"
         const val CONFIG_FILES_ORDER: String = "ConfigFilesOrder"
         const val DISABLE_VPN: String = "DisableVpn"
+        const val AUTO_START_ON_LAUNCH: String = "AutoStartOnLaunch"
         const val CONNECTIVITY_TEST_TARGET: String = "ConnectivityTestTarget"
         const val CONNECTIVITY_TEST_TIMEOUT: String = "ConnectivityTestTimeout"
         const val GEOIP_URL: String = "GeoipUrl"
