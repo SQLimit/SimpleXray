@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="config_tab_title">配置</string>
+    <string name="auto_start_on_launch_title">打开应用时自动连接</string>
+    <string name="auto_start_on_launch_summary">点击应用图标时，使用所选配置自动连接。关闭此选项不会断开当前连接。</string>
     <string name="socks_address">目标Socks地址</string>
     <string name="socks_port">目标Socks端口</string>
     <string name="socks_pass">SOCKS 密码</string>
