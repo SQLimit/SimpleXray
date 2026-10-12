@@ -95,6 +95,7 @@ class MainViewModel(application: Application) :
                 httpProxyEnabled = prefs.httpProxyEnabled,
                 bypassLanEnabled = prefs.bypassLan,
                 disableVpn = prefs.disableVpn,
+                autoStartOnLaunch = prefs.autoStartOnLaunch,
                 themeMode = prefs.theme
             ),
             info = InfoStates(
@@ -200,6 +201,7 @@ class MainViewModel(application: Application) :
                 httpProxyEnabled = prefs.httpProxyEnabled,
                 bypassLanEnabled = prefs.bypassLan,
                 disableVpn = prefs.disableVpn,
+                autoStartOnLaunch = prefs.autoStartOnLaunch,
                 themeMode = prefs.theme
             ),
             info = _settingsState.value.info.copy(
@@ -574,6 +576,13 @@ class MainViewModel(application: Application) :
         )
     }
 
+    fun setAutoStartOnLaunchEnabled(enabled: Boolean) {
+        prefs.autoStartOnLaunch = enabled
+        _settingsState.value = _settingsState.value.copy(
+            switches = _settingsState.value.switches.copy(autoStartOnLaunch = enabled)
+        )
+    }
+
     fun setDisableVpnEnabled(enabled: Boolean) {
         prefs.disableVpn = enabled
         _settingsState.value = _settingsState.value.copy(
@@ -645,6 +654,9 @@ class MainViewModel(application: Application) :
         initializationJob.join()
         if (request <= handledAutoStartRequest) return
         handledAutoStartRequest = request
+
+        // Check the saved choice after initialization; manual starts ignore this setting.
+        if (!prefs.autoStartOnLaunch) return
 
         // An empty installation stays available for importing its first config.
         if (_selectedConfigFile.value?.isFile != true) return
