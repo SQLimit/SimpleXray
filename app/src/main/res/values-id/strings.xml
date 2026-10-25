@@ -19,8 +19,6 @@
     <string name="configuration">Konfigurasi</string>
     <string name="bypass_lan_title">Lewati LAN</string>
     <string name="bypass_lan_summary">Saat diaktifkan, lalu lintas LAN tidak akan melewati proksi.</string>
-    <string name="use_template_title">Buat konfigurasi baru dari templat</string>
-    <string name="use_template_summary">Saat diaktifkan, konfigurasi baru akan diisi sebelumnya dengan konten templat.</string>
     <string name="vpn_interface">Antarmuka VPN</string>
     <string name="confirm">Konfirmasi</string>
     <string name="cancel">Batal</string>
