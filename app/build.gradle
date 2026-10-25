@@ -37,9 +37,6 @@ android {
         applicationId "com.simplexray.an"
         versionCode versionProps.APP_VERSION_CODE.toInteger()
         versionName versionProps.XRAY_CORE_VERSION.replaceFirst('^v', '')
-        ndk {
-            abiFilters "arm64-v8a"
-        }
         externalNativeBuild {
             ndkBuild {
                 arguments "APP_CFLAGS+=-DPKGNAME=com/simplexray/an/service -ffile-prefix-map=${rootDir}=."
