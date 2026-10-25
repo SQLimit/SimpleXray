@@ -8,7 +8,7 @@
       {
         "address": "fakedns",
         "domains": [
-          "geosite:gfw",
+          "geosite:geolocation-!cn",
           "googleapis.cn"
         ]
       }
@@ -64,13 +64,13 @@
       },
       {
         "domain": [
-          "geosite:ads"
+          "geosite:category-ads-all"
         ],
         "outboundTag": "block"
       },
       {
         "domain": [
-          "geosite:gfw",
+          "geosite:geolocation-!cn",
           "googleapis.cn"
         ],
         "outboundTag": "proxy"
