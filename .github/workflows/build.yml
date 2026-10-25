@@ -112,7 +112,7 @@ jobs:
           find app/build/outputs/apk/release -name "*.apk" -exec cp {} apks/ \;
 
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: simplexray-apks
           path: apks/
@@ -129,12 +129,12 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: release
           pattern: "simplexray-*"
