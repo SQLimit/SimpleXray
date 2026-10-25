@@ -19,8 +19,6 @@
     <string name="configuration">Конфигурация</string>
     <string name="bypass_lan_title">Обход локальной сети</string>
     <string name="bypass_lan_summary">Если включено, трафик локальной сети не будет проходить через прокси.</string>
-    <string name="use_template_title">Создавать новую конфигурацию из шаблона</string>
-    <string name="use_template_summary">Если включено, новые конфигурации будут предварительно заполнены содержимым шаблона.</string>
     <string name="vpn_interface">VPN-интерфейс</string>
     <string name="confirm">Подтвердить</string>
     <string name="cancel">Отмена</string>
