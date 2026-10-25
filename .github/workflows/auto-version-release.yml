@@ -94,6 +94,20 @@ jobs:
           printf 'version=%s\ncommit=%s\n' "$label" "$actual" >> "$GITHUB_OUTPUT"
           printf 'HEV pinned at %s (%s). HEV changes do not create a Release.\n' "$label" "$actual"
 
+      - name: Check latest stable Android NDK
+        id: ndk
+        run: python3 scripts/update_ndk_version.py
+
+      - name: Commit NDK version without creating a release
+        if: steps.ndk.outputs.changed == 'true'
+        env:
+          NDK_VERSION: ${{ steps.ndk.outputs.version }}
+        run: |
+          set -euo pipefail
+          git add version.properties
+          git commit -m "chore: update Android NDK to $NDK_VERSION"
+          git push origin HEAD:main
+
       - name: Read Go version from the official Xray binary
         if: steps.xray.outputs.changed == 'true'
         id: go
@@ -114,7 +128,7 @@ jobs:
           fi
           printf 'version=%s\n' "$go_version" >> "$GITHUB_OUTPUT"
 
-      - name: Bump app version only for a new Xray release
+      - name: Match app version to Xray and increment versionCode
         if: steps.xray.outputs.changed == 'true'
         id: app
         shell: bash
@@ -138,17 +152,13 @@ jobs:
               return matches[0].strip()
 
           code = str(int(value('APP_VERSION_CODE')) + 1)
-          old_name = value('APP_VERSION_NAME')
-          if not re.fullmatch(r'\d+(?:\.\d+)+', old_name):
-              raise SystemExit('APP_VERSION_NAME must be a dotted numeric version')
-          parts = old_name.split('.')
-          parts[-1] = str(int(parts[-1]) + 1)
-          name = '.'.join(parts)
+          name = os.environ['XRAY_TAG'].removeprefix('v')
+          if not re.fullmatch(r'\d+\.\d+\.\d+', name):
+              raise SystemExit('Xray version must be a dotted numeric version')
           updates = {
               'XRAY_CORE_VERSION': os.environ['XRAY_TAG'],
               'GO_VERSION': os.environ['GO_VERSION'],
               'APP_VERSION_CODE': code,
-              'APP_VERSION_NAME': name,
           }
           for key, replacement in updates.items():
               value(key)
@@ -158,7 +168,7 @@ jobs:
               output.write(f'version={name}\n')
           PY
           git add version.properties
-          git commit -m "chore: update Xray-core to $XRAY_TAG and bump app version"
+          git commit -m "chore: update Xray-core and app version to $XRAY_TAG"
           git push origin HEAD:main
           printf 'commit=%s\n' "$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
@@ -171,15 +181,17 @@ jobs:
           XRAY_TAG: ${{ steps.xray.outputs.latest }}
           HEV_VERSION: ${{ steps.hev.outputs.version }}
           HEV_COMMIT: ${{ steps.hev.outputs.commit }}
+          NDK_VERSION: ${{ steps.ndk.outputs.version }}
         run: |
           set -euo pipefail
           notes_file="$RUNNER_TEMP/simplexray-release-notes.md"
           {
             printf '### Changes\n\n- Xray-core updated to **%s**.\n' "$XRAY_TAG"
             printf '\n### Bundled HEV\n\n- Version: **%s**\n- Commit: `%s`\n' "$HEV_VERSION" "$HEV_COMMIT"
+            printf '\n### Build toolchain\n\n- Android NDK: **%s**\n' "$NDK_VERSION"
           } > "$notes_file"
           gh release create "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --target "$RELEASE_COMMIT" --title "$RELEASE_TAG" --notes-file "$notes_file"
 
       - name: No Xray release required
         if: steps.xray.outputs.changed != 'true'
-        run: echo 'Xray-core is unchanged. HEV may have been updated, but the app version and Releases are unchanged.'
+        run: echo 'Xray-core is unchanged. HEV or NDK may have been updated, but the app version and Releases are unchanged.'

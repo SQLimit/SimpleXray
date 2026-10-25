@@ -42,6 +42,25 @@ jobs:
         run: |
           echo "XRAY_VERSION=$(grep 'XRAY_CORE_VERSION' version.properties | cut -d '=' -f 2)" >> $GITHUB_ENV
           echo "GO_VERSION=$(grep 'GO_VERSION' version.properties | cut -d '=' -f 2)" >> $GITHUB_ENV
+          echo "NDK_VERSION=$(grep '^NDK_VERSION=' version.properties | cut -d '=' -f 2 | tr -d '\r')" >> $GITHUB_ENV
+
+      - name: Install configured Android NDK
+        run: |
+          set -euo pipefail
+          sdk_root="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+          if [[ -z "$sdk_root" || ! "$NDK_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo '::error::Android SDK root or NDK_VERSION is invalid.'
+            exit 1
+          fi
+          sdkmanager --sdk_root="$sdk_root" --install "ndk;$NDK_VERSION" --channel=0
+          ndk_dir="$sdk_root/ndk/$NDK_VERSION"
+          installed_version=$(sed -n 's/^Pkg\.Revision[[:space:]]*=[[:space:]]*//p' "$ndk_dir/source.properties" | tr -d '\r')
+          if [[ "$installed_version" != "$NDK_VERSION" ]]; then
+            echo '::error::Installed NDK revision does not match NDK_VERSION.'
+            exit 1
+          fi
+          test -x "$ndk_dir/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android24-clang"
+          printf 'XRAY_NDK_HOME=%s\n' "$ndk_dir" >> "$GITHUB_ENV"
 
       - name: Set up Go
         uses: actions/setup-go@v7
@@ -76,12 +95,6 @@ jobs:
 
       - name: Build Xray-core from Source
         run: |
-          # Set up NDK
-          wget -qO android-ndk.zip https://dl.google.com/android/repository/android-ndk-r28c-linux.zip
-          unzip -q android-ndk.zip
-          rm android-ndk.zip
-          NDK_HOME=$(realpath android-ndk-*)
-
           # Clone Xray-core source and checkout tag
           git clone https://github.com/XTLS/Xray-core.git
           cd Xray-core
@@ -95,7 +108,7 @@ jobs:
           # Build for arm64-v8a
           echo "Building for arm64-v8a..."
           export GOARCH=arm64
-          export CC=$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android24-clang
+          export CC="$XRAY_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android24-clang"
           go build -o xray -trimpath -buildvcs=false -ldflags="-X github.com/xtls/xray-core/core.build=${COMMID} -s -w -buildid= -checklinkname=0" -v ./main
           mkdir -p ../app/src/main/jniLibs/arm64-v8a
           mv xray ../app/src/main/jniLibs/arm64-v8a/libxray.so
