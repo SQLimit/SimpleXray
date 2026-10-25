@@ -41,8 +41,6 @@ jobs:
       - name: Read Versions
         run: |
           echo "XRAY_VERSION=$(grep 'XRAY_CORE_VERSION' version.properties | cut -d '=' -f 2)" >> $GITHUB_ENV
-          echo "GEOIP_VERSION=$(grep 'GEOIP_VERSION' version.properties | cut -d '=' -f 2)" >> $GITHUB_ENV
-          echo "GEOSITE_VERSION=$(grep 'GEOSITE_VERSION' version.properties | cut -d '=' -f 2)" >> $GITHUB_ENV
           echo "GO_VERSION=$(grep 'GO_VERSION' version.properties | cut -d '=' -f 2)" >> $GITHUB_ENV
 
       - name: Set up Go
@@ -52,9 +50,29 @@ jobs:
           cache: false
 
       - name: Download Rules Files
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          wget https://github.com/lhear/v2ray-rules-dat/releases/download/${{ env.GEOIP_VERSION }}/geoip.dat -O ./app/src/main/assets/geoip.dat
-          wget https://github.com/lhear/v2ray-rules-dat/releases/download/${{ env.GEOSITE_VERSION }}/geosite.dat -O ./app/src/main/assets/geosite.dat
+          set -euo pipefail
+          geodata_repo=XTLS/Xray-rules-dat
+          geodata_tag=$(gh api "repos/$geodata_repo/releases/latest" --jq '.tag_name')
+          if [[ -z "$geodata_tag" || "$geodata_tag" == null ]]; then
+            echo '::error::Could not determine the latest Xray geodata release.'
+            exit 1
+          fi
+          geodata_dir=$(mktemp -d "$RUNNER_TEMP/xray-geodata.XXXXXX")
+          gh release download "$geodata_tag" --repo "$geodata_repo" \
+            --pattern geoip-lite.dat --pattern geoip-lite.dat.sha256sum \
+            --pattern geosite.dat --pattern geosite.dat.sha256sum \
+            --dir "$geodata_dir"
+          (
+            cd "$geodata_dir"
+            sha256sum --check geoip-lite.dat.sha256sum geosite.dat.sha256sum
+          )
+          mkdir -p app/src/main/assets
+          install -m 644 "$geodata_dir/geoip-lite.dat" app/src/main/assets/geoip.dat
+          install -m 644 "$geodata_dir/geosite.dat" app/src/main/assets/geosite.dat
+          echo "Bundled Xray geodata from $geodata_repo@$geodata_tag (GeoIP lite and GeoSite)."
 
       - name: Build Xray-core from Source
         run: |
