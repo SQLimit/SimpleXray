@@ -226,12 +226,6 @@ class Preferences(context: Context) {
             setValueInProvider(BYPASS_LAN, enable)
         }
 
-    var useTemplate: Boolean
-        get() = getBooleanPref(USE_TEMPLATE, true)
-        set(enable) {
-            setValueInProvider(USE_TEMPLATE, enable)
-        }
-
     var httpProxyEnabled: Boolean
         get() = getBooleanPref(HTTP_PROXY_ENABLED, true)
         set(enable) {
@@ -340,7 +334,6 @@ class Preferences(context: Context) {
         const val ENABLE: String = "Enable"
         const val SELECTED_CONFIG_PATH: String = "SelectedConfigPath"
         const val BYPASS_LAN: String = "BypassLan"
-        const val USE_TEMPLATE: String = "UseTemplate"
         const val HTTP_PROXY_ENABLED: String = "HttpProxyEnabled"
         const val CUSTOM_GEOIP_IMPORTED: String = "CustomGeoipImported"
         const val CUSTOM_GEOSITE_IMPORTED: String = "CustomGeositeImported"
