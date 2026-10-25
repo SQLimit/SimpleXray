@@ -282,13 +282,17 @@ class Preferences(context: Context) {
         }
 
     var geoipUrl: String
-        get() = getPrefData(GEOIP_URL).first ?: context1.getString(R.string.geoip_url)
+        get() = getPrefData(GEOIP_URL).first
+            ?.takeUnless { it == "https://github.com/lhear/v2ray-rules-dat/releases/latest/download/geoip.dat" }
+            ?: context1.getString(R.string.geoip_url)
         set(value) {
             setValueInProvider(GEOIP_URL, value)
         }
 
     var geositeUrl: String
-        get() = getPrefData(GEOSITE_URL).first ?: context1.getString(R.string.geosite_url)
+        get() = getPrefData(GEOSITE_URL).first
+            ?.takeUnless { it == "https://github.com/lhear/v2ray-rules-dat/releases/latest/download/geosite.dat" }
+            ?: context1.getString(R.string.geosite_url)
         set(value) {
             setValueInProvider(GEOSITE_URL, value)
         }
