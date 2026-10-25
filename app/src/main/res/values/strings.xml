@@ -4,9 +4,9 @@
     <string name="auto_start_on_launch_title">Connect automatically when opening the app</string>
     <string name="auto_start_on_launch_summary">Use the selected profile when opening the app from its icon. Turning this off keeps the current connection running.</string>
     <string name="app_name" translatable="false">SimpleXray</string>
-    <string name="source_url" translatable="false">https://github.com/lhear/SimpleXray</string>
-    <string name="geoip_url" translatable="false">https://github.com/lhear/v2ray-rules-dat/releases/latest/download/geoip.dat</string>
-    <string name="geosite_url" translatable="false">https://github.com/lhear/v2ray-rules-dat/releases/latest/download/geosite.dat</string>
+    <string name="source_url" translatable="false">https://github.com/SQLimit/SimpleXray</string>
+    <string name="geoip_url" translatable="false">https://github.com/XTLS/Xray-rules-dat/releases/latest/download/geoip-lite.dat</string>
+    <string name="geosite_url" translatable="false">https://github.com/XTLS/Xray-rules-dat/releases/latest/download/geosite.dat</string>
     <string name="connectivity_test_url" translatable="false">http://www.gstatic.com/generate_204</string>
     <string name="socks_address">Target SOCKS Address</string>
     <string name="socks_port">Target SOCKS Port</string>
